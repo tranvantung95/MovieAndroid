@@ -10,79 +10,79 @@ import androidx.lifecycle.viewModelScope
 import com.example.feature.movies.presentation.fakedomain.GetMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class MovieListViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle, val getMoviesUseCase: GetMoviesUseCase
+    savedStateHandle: SavedStateHandle,
+    private val getMoviesUseCase: GetMoviesUseCase
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(MovieListUiState())
-
-    var movieQuery by mutableStateOf("")
-        private set
-
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val uiState: StateFlow<MovieListUiState> = snapshotFlow {
-        movieQuery
-    }.debounce(300)
+    private var movieQuery by mutableStateOf("")
+    private val queryFlow = snapshotFlow { movieQuery }
         .distinctUntilChanged()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val apiResultsFlow = queryFlow.debounce(300)
         .flatMapLatest { query ->
-            println("movie_router flatmap $query")
             flow {
-                emit(
-                    MovieListUiState(
-                        searchQuery = query,
-                        isLoading = true
-                    )
-                )
+                emit(ApiState.Loading)
                 getMoviesUseCase.invoke(query)
                     .onSuccess { movies ->
-                        emit(
-                            MovieListUiState(
-                                searchQuery = query,
-                                movies = movies,
-                                isLoading = false
-                            )
-                        )
+                        emit(ApiState.Success(movies))
                     }
-                    .onFailure { exception ->
-                        emit(
-                            MovieListUiState(
-                                searchQuery = query,
-                                isLoading = false,
-                                errorMessage = exception.message ?: "Unknown Error"
-                            )
-                        )
+                    .onFailure { error ->
+                        emit(ApiState.Error(error.message ?: "Unknown error"))
                     }
+
+            }.catch {
+                emit(ApiState.Error(it.message ?: "Unknown error"))
             }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = MovieListUiState(searchQuery = "")
-        )
+
+    val uiState: StateFlow<MovieListUiState> = combine(
+        queryFlow,
+        apiResultsFlow
+    ) { query, apiResult ->
+        when (apiResult) {
+            is ApiState.Loading -> MovieListUiState(
+                searchQuery = query,
+                isLoading = true,
+                movies = emptyList(),
+                errorMessage = null
+            )
+
+            is ApiState.Success -> MovieListUiState(
+                searchQuery = query,
+                isLoading = false,
+                movies = apiResult.data,
+                errorMessage = null
+            )
+
+            is ApiState.Error -> MovieListUiState(
+                searchQuery = query,
+                isLoading = false,
+                movies = emptyList(),
+                errorMessage = apiResult.message
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = MovieListUiState()
+    )
 
     fun onSearchQueryChanged(query: String) {
-        println("movie_router,, viewmodel $query")
         movieQuery = query
     }
-
-    fun clearError() {
-        _uiState.update {
-            it.copy(errorMessage = null)
-        }
-    }
-
 }
 
 sealed class ApiState<out T> {

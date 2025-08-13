@@ -33,7 +33,6 @@ fun MovieRouter(
     viewModel: MovieListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    println("movie_router: ${uiState.searchQuery}")
     Scaffold(modifier = modifier, topBar = {
         SearchBar(
             modifier = Modifier
@@ -41,7 +40,6 @@ fun MovieRouter(
                 .padding(horizontal = 8.dp),
             query = uiState.searchQuery,
             onQueryChange = {
-                println("movie_router query change: $it")
                 viewModel.onSearchQueryChanged(it)
             })
     }) { paddingValues ->
@@ -49,6 +47,7 @@ fun MovieRouter(
             modifier = Modifier.padding(paddingValues),
             movies = uiState.movies,
             onMovieClick = onMovieClick,
+            isSearching = uiState.searchQuery.isNotEmpty()
         )
         AnimatedVisibility(visible = uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -62,16 +61,16 @@ fun MovieRouter(
 fun MovieTrendingScreen(
     modifier: Modifier = Modifier,
     movies: List<Movie>,
+    isSearching: Boolean = false,
     onMovieClick: (Movie) -> Unit = {}
 ) {
-    var searchQuery by remember { mutableStateOf("") }
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Text(
-            text = "Trending Movies",
+            text = if (isSearching) "Search result" else " Trending movies",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -147,7 +146,7 @@ fun MovieCard(
         ) {
             // Movie Poster
             AsyncImage(
-                model = movie.getPosterUrl(),
+                model = movie.getPosterUrl() ?: movie.getBackdropUrl(),
                 contentDescription = "${movie.title} poster",
                 modifier = Modifier
                     .width(80.dp)

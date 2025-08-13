@@ -1,5 +1,6 @@
 package com.example.feature.movies.presentation
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,12 +29,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,12 +58,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.feature.movies.presentation.model.Genre
 import com.example.feature.movies.presentation.model.MovieDetail
 import com.example.feature.movies.presentation.model.ProductionCompany
 import com.example.feature.movies.presentation.model.ProductionCountry
 import com.example.feature.movies.presentation.model.SpokenLanguage
+import kotlinx.coroutines.launch
 
 @Composable
 fun MovieDetailRouter(
@@ -62,17 +74,44 @@ fun MovieDetailRouter(
     onPlayTrailerClick: () -> Unit,
     viewModel: MovieDetailViewModel = hiltViewModel()
 ) {
-    MovieDetailScreen(
-        modifier = modifier,
-        onBackClick = onBackClick,
-        onPlayTrailerClick = onPlayTrailerClick
-    )
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(state.errorMessage) {
+        if (state.errorMessage?.isNotEmpty() == true) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = state.errorMessage.orEmpty(),
+                    actionLabel = "Undo",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            viewModel.clearError()
+        }
+    }
+    Scaffold(snackbarHost = {
+        SnackbarHost(snackbarHostState)
+    }) { pading ->
+        if (state.movieDetail != null){
+            MovieDetailScreen(
+                modifier = modifier.padding(pading),
+                onBackClick = onBackClick,
+                onPlayTrailerClick = onPlayTrailerClick,
+                movieDetail = state.movieDetail!!
+            )
+        }
+        AnimatedVisibility(visible = state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+    }
 }
 
 @Composable
 fun MovieDetailScreen(
     modifier: Modifier = Modifier,
-    movieDetail: MovieDetail = getSampleMovieDetail(),
+    movieDetail: MovieDetail,
     onBackClick: () -> Unit = {},
     onPlayTrailerClick: () -> Unit = {}
 ) {
@@ -518,5 +557,5 @@ fun getSampleMovieDetail(): MovieDetail {
 @Composable
 @Preview(showBackground = true)
 fun MovieDetailScreenPreview() {
-    MovieDetailScreen()
+    MovieDetailScreen(movieDetail = getSampleMovieDetail())
 }

@@ -28,7 +28,6 @@ class FakeMovieRepositoryImpl @Inject constructor() : MovieRepository {
     override suspend fun getMovieDetail(movieId: Int): MovieDetail {
         // Simulate network delay
         delay(600)
-
         // In real implementation, you would call API with movieId
         // For demo, return sample data regardless of ID
         return getSampleMovieDetail()
