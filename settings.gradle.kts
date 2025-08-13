@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "MovieAndroid"
 include(":app")
+include("feature:movies:presentaition")
+include(":navigation")
