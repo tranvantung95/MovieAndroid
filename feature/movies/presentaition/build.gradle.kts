@@ -44,6 +44,7 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.shared)
     implementation(libs.androidx.lifecycle.viewmodel.compose.v270)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.material.icons.extended)
