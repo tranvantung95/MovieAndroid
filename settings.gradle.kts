@@ -24,3 +24,4 @@ rootProject.name = "MovieAndroid"
 include(":app")
 include("feature:movies:presentaition")
 include(":navigation")
+include(":core:feature")

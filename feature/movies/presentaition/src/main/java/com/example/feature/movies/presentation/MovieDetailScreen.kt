@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -62,7 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.feature.movies.presentation.core.rememberNetworkConnection
+import com.example.core.feature.rememberNetworkConnection
 import com.example.feature.movies.presentation.model.GenreUiModel
 import com.example.feature.movies.presentation.model.MovieDetailUiModel
 import com.example.feature.movies.presentation.model.ProductionCompanyUiModel

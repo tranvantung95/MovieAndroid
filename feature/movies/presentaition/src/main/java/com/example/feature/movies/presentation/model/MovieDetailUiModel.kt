@@ -1,6 +1,6 @@
 package com.example.feature.movies.presentation.model
 
-import com.example.feature.movies.presentation.core.UiModel
+import com.example.core.feature.UiModel
 
 // Enhanced data models for Movie Detail API response
 data class MovieDetailUiModel(
@@ -130,7 +130,7 @@ data class SpokenLanguageUiModel(
     val englishName: String,
     val iso6391: String,
     val name: String
-):UiModel
+): UiModel
 
 data class CollectionUiModel(
     val id: Int? = null,

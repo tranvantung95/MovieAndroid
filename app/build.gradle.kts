@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("dagger.hilt.android.plugin")
     id("com.google.devtools.ksp") version "2.2.0-2.0.2"
 }
 
@@ -42,20 +41,12 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:feature"))
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
     implementation(project(":feature:movies:presentaition"))
     implementation(project(":navigation"))
     implementation(libs.shared)
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
-    ksp(libs.hilt.android)
-    ksp(libs.dagger.hilt.compiler)
-    ksp(libs.androidx.hilt.compiler)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

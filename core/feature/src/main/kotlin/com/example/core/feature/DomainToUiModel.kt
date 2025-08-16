@@ -1,4 +1,4 @@
-package com.example.feature.movies.presentation.core
+package com.example.core.feature
 
 import com.example.share.core.domain.DomainModel
 

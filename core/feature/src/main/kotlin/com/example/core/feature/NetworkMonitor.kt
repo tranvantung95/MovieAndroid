@@ -1,4 +1,4 @@
-package com.example.feature.movies.presentation.core
+package com.example.core.feature
 
 import android.content.Context
 import android.net.ConnectivityManager

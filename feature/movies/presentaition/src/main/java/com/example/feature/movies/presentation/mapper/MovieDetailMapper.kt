@@ -1,6 +1,6 @@
 package com.example.feature.movies.presentation.mapper
 
-import com.example.feature.movies.presentation.core.DomainToUiModel
+import com.example.core.feature.DomainToUiModel
 import com.example.feature.movies.presentation.model.CollectionUiModel
 import com.example.feature.movies.presentation.model.GenreUiModel
 import com.example.feature.movies.presentation.model.MovieDetailUiModel

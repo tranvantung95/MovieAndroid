@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature.movies.presentation"
+    namespace = "com.example.core.feature"
     compileSdk = 35
 
     defaultConfig {
@@ -42,15 +42,34 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:feature"))
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.test.manifest)
-    androidTestImplementation(libs.coil.test)
+    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
+    api(composeBom)
+    api(libs.kotlinx.serialization.json)
+    api(libs.shared)
+    api(libs.androidx.lifecycle.viewmodel.compose.v270)
+    api(libs.androidx.constraintlayout.compose)
+    api(libs.androidx.material.icons.extended)
+    api(libs.androidx.navigation.compose)
+    api(libs.androidx.material3.android)
+    api(libs.androidx.ui.tooling.preview)
+    api(libs.androidx.activity.compose)
+    api(libs.androidx.lifecycle.runtime.compose)
+    api(libs.coil.kt.coil.compose)
+    api(libs.androidx.lifecycle.viewmodel.compose.v270)
+    api(libs.androidx.lifecycle.viewmodel.ktx)
+    api(libs.kotlinx.coroutines.android)
+    api(libs.koin.core)
+    api(libs.koin.android)
+    api(libs.koin.androidx.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.dagger.hilt.compiler)
     ksp(libs.hilt.android.compiler)
     ksp(libs.hilt.android)
     ksp(libs.androidx.hilt.compiler)
     debugImplementation(libs.androidx.ui.tooling)
+    api(libs.androidx.core.ktx)
+    api(libs.androidx.appcompat)
+    api(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
