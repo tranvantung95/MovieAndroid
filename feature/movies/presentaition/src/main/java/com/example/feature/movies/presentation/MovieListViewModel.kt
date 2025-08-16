@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.feature.movies.presentation.mapper.MovieUiMapper
 import com.example.share.feature.movie.domain.GetMoviesUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 class MovieListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -29,6 +31,8 @@ class MovieListViewModel(
     private val queryFlow = snapshotFlow { movieQuery }
         .distinctUntilChanged()
 
+    private val _uiState = MutableStateFlow(MovieListUiState())
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val apiResultsFlow = queryFlow
         .flatMapLatest { query ->
@@ -38,12 +42,11 @@ class MovieListViewModel(
                         onSuccess = { movies ->
                             ApiState.Success(movies)
                         },
-                        onFailure = {
-                            error -> ApiState.Error(error.message ?: "Unknown error")
+                        onFailure = { error ->
+                            ApiState.Error(error.message ?: "Unknown error")
                         }
                     )
-                }
-                .onStart {
+                }.onStart {
                     emit(ApiState.Loading)
                 }
         }
@@ -52,26 +55,24 @@ class MovieListViewModel(
         }
 
     val uiState: StateFlow<MovieListUiState> = combine(
+        _uiState,
         queryFlow,
         apiResultsFlow
-    ) { query, apiResult ->
+    ) { currentState, _, apiResult ->
         when (apiResult) {
-            is ApiState.Loading -> MovieListUiState(
-                searchQuery = query,
+            is ApiState.Loading -> currentState.copy(
                 isLoading = true,
                 movieUis = emptyList(),
                 errorMessage = null
             )
 
-            is ApiState.Success -> MovieListUiState(
-                searchQuery = query,
+            is ApiState.Success -> currentState.copy(
                 isLoading = false,
                 movieUis = movieUiMapper.mapToUIList(apiResult.data),
                 errorMessage = null
             )
 
-            is ApiState.Error -> MovieListUiState(
-                searchQuery = query,
+            is ApiState.Error -> currentState.copy(
                 isLoading = false,
                 movieUis = emptyList(),
                 errorMessage = apiResult.message
@@ -85,12 +86,11 @@ class MovieListViewModel(
 
     fun onSearchQueryChanged(query: String) {
         movieQuery = query
+        _uiState.update { it.copy(searchQuery = query, isLoading = false) }
     }
-    fun clearError() {
 
-        uiState.value.errorMessage?.let {
-             uiState.value.copy(errorMessage = null)
-        }
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }
 

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.feature.movies.presentation.core.rememberNetworkConnection
 import com.example.feature.movies.presentation.mapper.MovieUiMapper
 import com.example.feature.movies.presentation.model.MovieUi
 import kotlinx.coroutines.launch
@@ -39,6 +40,7 @@ fun MovieRouter(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isNetworkAvailable = rememberNetworkConnection()
     LaunchedEffect(uiState.errorMessage) {
         if (uiState.errorMessage?.isNotEmpty() == true) {
             scope.launch {
@@ -65,14 +67,15 @@ fun MovieRouter(
     }) { paddingValues ->
         MovieTrendingScreen(
             modifier = Modifier.padding(paddingValues),
+            isNetworkAvailable = isNetworkAvailable,
             movieUis = uiState.movieUis,
             onMovieClick = onMovieClick,
             isSearching = uiState.searchQuery.isNotEmpty()
         )
-        AnimatedVisibility(visible = uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+    }
+    AnimatedVisibility(visible = uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
     }
 }
@@ -81,6 +84,7 @@ fun MovieRouter(
 fun MovieTrendingScreen(
     modifier: Modifier = Modifier,
     movieUis: List<MovieUi>,
+    isNetworkAvailable: Boolean = true,
     isSearching: Boolean = false,
     onMovieClick: (MovieUi) -> Unit = {}
 ) {
@@ -89,6 +93,10 @@ fun MovieTrendingScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        NetworkWarningBanner(
+            modifier = Modifier.padding(8.dp),
+            isVisible = isNetworkAvailable.not()
+        )
         Text(
             text = if (isSearching) "Search result" else "Trending movies",
             style = MaterialTheme.typography.headlineMedium,

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.feature.movies.presentation.core.rememberNetworkConnection
 import com.example.feature.movies.presentation.model.GenreUiModel
 import com.example.feature.movies.presentation.model.MovieDetailUiModel
 import com.example.feature.movies.presentation.model.ProductionCompanyUiModel
@@ -67,6 +71,7 @@ import com.example.feature.movies.presentation.model.SpokenLanguageUiModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailRouter(
     modifier: Modifier = Modifier,
@@ -76,13 +81,14 @@ fun MovieDetailRouter(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val isNetworkAvailable = rememberNetworkConnection()
     val scope = rememberCoroutineScope()
     LaunchedEffect(state.errorMessage) {
         if (state.errorMessage?.isNotEmpty() == true) {
             scope.launch {
                 snackbarHostState.showSnackbar(
                     message = state.errorMessage.orEmpty(),
-                    actionLabel = "Undo",
+                    actionLabel = "",
                     duration = SnackbarDuration.Short
                 )
             }
@@ -91,20 +97,73 @@ fun MovieDetailRouter(
     }
     Scaffold(snackbarHost = {
         SnackbarHost(snackbarHostState)
-    }) { pading ->
-        if (state.movieDetail != null){
+    }, topBar = {
+        TopAppBar(navigationIcon = {
+            IconButton(
+                onClick = onBackClick, modifier = Modifier
+                    .padding(16.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), RoundedCornerShape(50)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }, title = {
+            Text(
+                modifier = Modifier,
+                text = state.movieDetail?.originalTitle.orEmpty(),
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        })
+
+    }) { padding ->
+        if (state.movieDetail != null) {
             MovieDetailScreen(
-                modifier = modifier.padding(pading),
-                onBackClick = onBackClick,
-                onPlayTrailerClick = onPlayTrailerClick,
-                movieDetail = state.movieDetail!!
+                modifier = modifier.padding(padding),
+                movieDetail = state.movieDetail!!,
+                onPlayTrailerClick = onPlayTrailerClick, isNetworkAvailable = isNetworkAvailable
+            )
+        } else if (!state.isLoading) {
+            MovieDetailEmptyScreen(
+                modifier = Modifier.padding(padding),
+                isNetworkAvailable = isNetworkAvailable
             )
         }
-        AnimatedVisibility(visible = state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+    }
+
+    AnimatedVisibility(visible = state.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
+    }
+}
+
+@Composable
+fun MovieDetailEmptyScreen(modifier: Modifier = Modifier, isNetworkAvailable: Boolean) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        NetworkWarningBanner(isVisible = !isNetworkAvailable, modifier = Modifier.fillMaxWidth())
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Nothing to display",
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+
     }
 }
 
@@ -112,7 +171,7 @@ fun MovieDetailRouter(
 fun MovieDetailScreen(
     modifier: Modifier = Modifier,
     movieDetail: MovieDetailUiModel,
-    onBackClick: () -> Unit = {},
+    isNetworkAvailable: Boolean = true,
     onPlayTrailerClick: () -> Unit = {}
 ) {
     Column(
@@ -121,6 +180,7 @@ fun MovieDetailScreen(
             .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background)
     ) {
+        NetworkWarningBanner(isVisible = !isNetworkAvailable)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,33 +203,14 @@ fun MovieDetailScreen(
                                 Color.Transparent,
                                 MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
                                 MaterialTheme.colorScheme.background
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
+                            ), startY = 0f, endY = Float.POSITIVE_INFINITY
                         )
                     )
             )
-
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                        RoundedCornerShape(50)
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Poster
             AsyncImage(
@@ -252,8 +293,7 @@ fun MovieDetailScreen(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play"
+                        imageVector = Icons.Default.PlayArrow, contentDescription = "Play"
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Play Trailer")
@@ -306,9 +346,7 @@ fun MovieStatsSection(movieDetail: MovieDetailUiModel) {
 
 @Composable
 fun StatItem(
-    icon: ImageVector,
-    label: String,
-    value: String
+    icon: ImageVector, label: String, value: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -321,9 +359,7 @@ fun StatItem(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = value,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
+            text = value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold
         )
         Text(
             text = label,
@@ -419,8 +455,7 @@ fun ProductionCompanyItem(company: ProductionCompanyUiModel) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (company.logoPath != null) {
                 AsyncImage(
@@ -467,8 +502,7 @@ fun AdditionalInfoSection(movieDetail: MovieDetailUiModel) {
             InfoRow(label = "Budget", value = movieDetail.getFormattedBudget())
             InfoRow(label = "Revenue", value = movieDetail.getFormattedRevenue())
             InfoRow(
-                label = "Production Countries",
-                value = movieDetail.getProductionCountriesString()
+                label = "Production Countries", value = movieDetail.getProductionCountriesString()
             )
             InfoRow(label = "Spoken Languages", value = movieDetail.getSpokenLanguagesString())
 
@@ -517,9 +551,7 @@ fun getSampleMovieDetail(): MovieDetailUiModel {
         belongsToCollectionUiModel = null,
         budget = 25000000,
         genreUiModels = listOf(
-            GenreUiModel(37, "Western"),
-            GenreUiModel(35, "Comedy"),
-            GenreUiModel(80, "Crime")
+            GenreUiModel(37, "Western"), GenreUiModel(35, "Comedy"), GenreUiModel(80, "Crime")
         ),
         homepage = "https://a24films.com/films/eddington",
         id = 648878,
@@ -532,7 +564,9 @@ fun getSampleMovieDetail(): MovieDetailUiModel {
         posterPath = "/4GIqZUgPZ146BhibsPHMHef2nXX.jpg",
         productionCompanies = listOf(
             ProductionCompanyUiModel(41077, "/1ZXsGaFPgrgS6ZZGS37AqD5uU12.png", "A24", "US"),
-            ProductionCompanyUiModel(123620, "/ePRhZ3yb09Ya6WMzCCBYopwIYbE.png", "Square Peg", "US"),
+            ProductionCompanyUiModel(
+                123620, "/ePRhZ3yb09Ya6WMzCCBYopwIYbE.png", "Square Peg", "US"
+            ),
             ProductionCompanyUiModel(178359, null, "828 Productions", "US")
         ),
         productionCountries = listOf(
@@ -558,4 +592,10 @@ fun getSampleMovieDetail(): MovieDetailUiModel {
 @Preview(showBackground = true)
 fun MovieDetailScreenPreview() {
     MovieDetailScreen(movieDetail = getSampleMovieDetail())
+}
+
+@Composable
+@Preview(showBackground = true)
+fun MovieDetailEmptyScreenPreview() {
+    MovieDetailEmptyScreen(isNetworkAvailable = false)
 }
