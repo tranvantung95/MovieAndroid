@@ -24,14 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.feature.movies.presentation.model.Movie
+import com.example.feature.movies.presentation.mapper.MovieUiMapper
+import com.example.feature.movies.presentation.model.MovieUi
 
 @Composable
 fun MovieRouter(
     modifier: Modifier = Modifier,
-    onMovieClick: (Movie) -> Unit,
+    onMovieClick: (MovieUi) -> Unit,
     viewModel: MovieListViewModel = hiltViewModel()
 ) {
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(modifier = modifier, topBar = {
         SearchBar(
@@ -45,7 +47,7 @@ fun MovieRouter(
     }) { paddingValues ->
         MovieTrendingScreen(
             modifier = Modifier.padding(paddingValues),
-            movies = uiState.movies,
+            movieUis = uiState.movieUis,
             onMovieClick = onMovieClick,
             isSearching = uiState.searchQuery.isNotEmpty()
         )
@@ -60,9 +62,9 @@ fun MovieRouter(
 @Composable
 fun MovieTrendingScreen(
     modifier: Modifier = Modifier,
-    movies: List<Movie>,
+    movieUis: List<MovieUi>,
     isSearching: Boolean = false,
-    onMovieClick: (Movie) -> Unit = {}
+    onMovieClick: (MovieUi) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -70,7 +72,7 @@ fun MovieTrendingScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         Text(
-            text = if (isSearching) "Search result" else " Trending movies",
+            text = if (isSearching) "Search result" else "Trending movies",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -81,9 +83,9 @@ fun MovieTrendingScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(movies) { movie ->
+            items(movieUis) { movie ->
                 MovieCard(
-                    movie = movie,
+                    movieUi = movie,
                     onClick = { onMovieClick(movie) }
                 )
             }
@@ -125,7 +127,7 @@ fun SearchBar(
 
 @Composable
 fun MovieCard(
-    movie: Movie,
+    movieUi: MovieUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -146,8 +148,8 @@ fun MovieCard(
         ) {
             // Movie Poster
             AsyncImage(
-                model = movie.getPosterUrl() ?: movie.getBackdropUrl(),
-                contentDescription = "${movie.title} poster",
+                model = movieUi.getPosterUrl() ?: movieUi.getBackdropUrl(),
+                contentDescription = "${movieUi.title} poster",
                 modifier = Modifier
                     .width(80.dp)
                     .height(120.dp)
@@ -165,7 +167,7 @@ fun MovieCard(
             ) {
                 // Title
                 Text(
-                    text = movie.title,
+                    text = movieUi.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
@@ -175,7 +177,7 @@ fun MovieCard(
 
                 // Release Year
                 Text(
-                    text = movie.getReleaseYear(),
+                    text = movieUi.getReleaseYear(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp)
@@ -194,13 +196,13 @@ fun MovieCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${movie.getFormattedRating()}/10",
+                        text = "${movieUi.getFormattedRating()}/10",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "(${movie.voteCount})",
+                        text = "(${movieUi.voteCount})",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -208,7 +210,7 @@ fun MovieCard(
 
                 // Overview
                 Text(
-                    text = movie.overview,
+                    text = movieUi.overview,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
@@ -224,7 +226,7 @@ fun MovieCard(
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
-                        text = "Popularity: ${String.format("%.0f", movie.popularity)}",
+                        text = "Popularity: ${String.format("%.0f", movieUi.popularity)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -238,7 +240,7 @@ fun MovieCard(
 @Composable
 @Preview(showBackground = true)
 fun MovieCardPreview() {
-    MovieCard(modifier = Modifier, movie = getSampleMovies().first(), onClick = {
+    MovieCard(modifier = Modifier, movieUi = getSampleMovies().first(), onClick = {
 
     })
 }
@@ -252,9 +254,9 @@ fun SearchBarPreview() {
 }
 
 // Sample data function using your provided JSON
-fun getSampleMovies(): List<Movie> {
+fun getSampleMovies(): List<MovieUi> {
     return listOf(
-        Movie(
+        MovieUi(
             id = 648878,
             title = "Eddington",
             originalTitle = "Eddington",
@@ -270,7 +272,7 @@ fun getSampleMovies(): List<Movie> {
             genreIds = listOf(37, 35, 80),
             video = false
         ),
-        Movie(
+        MovieUi(
             id = 936108,
             title = "Smurfs",
             originalTitle = "Smurfs",
@@ -286,7 +288,7 @@ fun getSampleMovies(): List<Movie> {
             genreIds = listOf(16, 10751, 14),
             video = false
         ),
-        Movie(
+        MovieUi(
             id = 1078605,
             title = "Weapons",
             originalTitle = "Weapons",
@@ -302,7 +304,7 @@ fun getSampleMovies(): List<Movie> {
             genreIds = listOf(27, 9648),
             video = false
         ),
-        Movie(
+        MovieUi(
             id = 1234821,
             title = "Jurassic World Rebirth",
             originalTitle = "Jurassic World Rebirth",
@@ -318,7 +320,7 @@ fun getSampleMovies(): List<Movie> {
             genreIds = listOf(878, 12, 28),
             video = false
         ),
-        Movie(
+        MovieUi(
             id = 986056,
             title = "Thunderbolts*",
             originalTitle = "Thunderbolts*",

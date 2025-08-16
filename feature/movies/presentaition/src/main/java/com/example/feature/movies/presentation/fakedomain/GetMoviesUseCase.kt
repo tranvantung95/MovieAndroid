@@ -1,24 +1,22 @@
 package com.example.feature.movies.presentation.fakedomain
 
-import com.example.feature.movies.presentation.model.Movie
-import javax.inject.Inject
+//
+//interface GetMoviesUseCase {
+//    suspend operator fun invoke(searchQuery: String): Result<List<Movie>>
+//}
 
-interface GetMoviesUseCase {
-    suspend operator fun invoke(searchQuery: String): Result<List<Movie>>
-}
-
-class GetMoviesUseCaseImpl @Inject constructor(
-    private val getTrendingMoviesUseCase: GetTrendingMoviesUseCase,
-    private val searchMoviesUseCase: SearchMoviesUseCase
-) : GetMoviesUseCase {
-
-    override suspend fun invoke(searchQuery: String): Result<List<Movie>> {
-        return if (searchQuery.isEmpty()) {
-            // Call /trending API
-            getTrendingMoviesUseCase()
-        } else {
-            // Call /search API
-            searchMoviesUseCase(searchQuery)
-        }
-    }
-}
+//class GetMoviesUseCaseImpl @Inject constructor(
+//    private val getTrendingMoviesUseCase: GetTrendingMoviesUseCase,
+//    private val searchMoviesUseCase: SearchMoviesUseCase
+//) : GetMoviesUseCase {
+//
+//    override suspend fun invoke(searchQuery: String): Result<List<Movie>> {
+//        return if (searchQuery.isEmpty()) {
+//            // Call /trending API
+//            getTrendingMoviesUseCase()
+//        } else {
+//            // Call /search API
+//            searchMoviesUseCase(searchQuery)
+//        }
+//    }
+//}

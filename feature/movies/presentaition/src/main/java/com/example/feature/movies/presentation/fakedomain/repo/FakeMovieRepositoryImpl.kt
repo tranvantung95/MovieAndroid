@@ -2,7 +2,7 @@ package com.example.feature.movies.presentation.fakedomain.repo
 
 import com.example.feature.movies.presentation.getSampleMovieDetail
 import com.example.feature.movies.presentation.getSampleMovies
-import com.example.feature.movies.presentation.model.Movie
+import com.example.feature.movies.presentation.model.MovieUi
 import com.example.feature.movies.presentation.model.MovieDetail
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -10,12 +10,12 @@ import javax.inject.Singleton
 
 @Singleton
 class FakeMovieRepositoryImpl @Inject constructor() : MovieRepository {
-    override suspend fun getTrendingMovies(): List<Movie> {
+    override suspend fun getTrendingMovies(): List<MovieUi> {
         delay(1000)
         return getSampleMovies()
     }
 
-    override suspend fun searchMovies(query: String): List<Movie> {
+    override suspend fun searchMovies(query: String): List<MovieUi> {
         delay(800)
         val allMovies = getSampleMovies()
         return allMovies.filter { movie ->

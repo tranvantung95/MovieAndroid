@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("dagger.hilt.android.plugin")
-    id("com.google.devtools.ksp") version "2.0.0-1.0.23"
+    id("com.google.devtools.ksp") version "2.2.0-2.0.2"
     kotlin(libs.plugins.kotlinSerialization.get().pluginId) version libs.versions.kotlin
 
 }
@@ -57,7 +57,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose.v270)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
-
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.dagger.hilt.compiler)

@@ -4,7 +4,7 @@ coilComposeVersion = "2.5.0"
 hiltAndroid = "2.56"
 androidx-hilt-navigation = "1.2.0"
 hiltNavigationCompose = "1.1.0"
-kotlin = "2.0.0"
+kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -22,9 +22,10 @@ material3Android = "1.3.2"
 materialIconsExtended = "1.7.8"
 navigationComposeVersion = "2.8.9"
 kotlinSerializationVerion = "2.1.21"
-kotlinxSerializationJsonVersion = "1.8.1"
-hilt = "2.51.1"
-shared = "1.0.0"
+koin = "4.0.0"
+kotlinxSerializationJsonVersion = "1.9.0"
+hilt = "2.56"
+shared = "1.0.1"
 [libraries]
 androidx-lifecycle-viewmodel-compose-v270 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelCompose" }
@@ -60,6 +61,8 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidx-hilt-navigation" }
 shared = { module = "com.example.movieapp:shared", version.ref = "shared" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 [plugins]
 kotlinSerialization = { id = "plugin.serialization", version.ref = "kotlinSerializationVerion" }
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,6 +1,8 @@
 package com.example.feature.movies.presentation.model
 
-data class Movie(
+import com.example.feature.movies.presentation.core.UiModel
+
+data class MovieUi(
     val id: Int,
     val title: String,
     val originalTitle: String,
@@ -15,7 +17,7 @@ data class Movie(
     val originalLanguage: String,
     val genreIds: List<Int>,
     val video: Boolean
-) {
+) : UiModel{
 
     fun getPosterUrl(size: String = "w500"): String? {
         return posterPath?.let { "https://image.tmdb.org/t/p/$size$it" }
