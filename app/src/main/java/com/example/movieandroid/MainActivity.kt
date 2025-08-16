@@ -21,7 +21,6 @@ import com.example.navigation.handleDeepLink
 import dagger.hilt.android.AndroidEntryPoint
 import android.net.Uri
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -57,22 +57,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.feature.movies.presentation.model.Genre
-import com.example.feature.movies.presentation.model.MovieDetail
-import com.example.feature.movies.presentation.model.ProductionCompany
-import com.example.feature.movies.presentation.model.ProductionCountry
-import com.example.feature.movies.presentation.model.SpokenLanguage
+import com.example.feature.movies.presentation.model.GenreUiModel
+import com.example.feature.movies.presentation.model.MovieDetailUiModel
+import com.example.feature.movies.presentation.model.ProductionCompanyUiModel
+import com.example.feature.movies.presentation.model.ProductionCountryUiModel
+import com.example.feature.movies.presentation.model.SpokenLanguageUiModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MovieDetailRouter(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onPlayTrailerClick: () -> Unit,
-    viewModel: MovieDetailViewModel = hiltViewModel()
+    viewModel: MovieDetailViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -111,7 +111,7 @@ fun MovieDetailRouter(
 @Composable
 fun MovieDetailScreen(
     modifier: Modifier = Modifier,
-    movieDetail: MovieDetail,
+    movieDetail: MovieDetailUiModel,
     onBackClick: () -> Unit = {},
     onPlayTrailerClick: () -> Unit = {}
 ) {
@@ -262,7 +262,7 @@ fun MovieDetailScreen(
         }
 
         MovieStatsSection(movieDetail = movieDetail)
-        GenresSection(genres = movieDetail.genres)
+        GenresSection(genreUiModels = movieDetail.genreUiModels)
         OverviewSection(overview = movieDetail.overview)
         ProductionCompaniesSection(companies = movieDetail.productionCompanies)
         AdditionalInfoSection(movieDetail = movieDetail)
@@ -272,7 +272,7 @@ fun MovieDetailScreen(
 }
 
 @Composable
-fun MovieStatsSection(movieDetail: MovieDetail) {
+fun MovieStatsSection(movieDetail: MovieDetailUiModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,7 +334,7 @@ fun StatItem(
 }
 
 @Composable
-fun GenresSection(genres: List<Genre>) {
+fun GenresSection(genreUiModels: List<GenreUiModel>) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
@@ -348,7 +348,7 @@ fun GenresSection(genres: List<Genre>) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(genres) { genre ->
+            items(genreUiModels) { genre ->
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
@@ -388,7 +388,7 @@ fun OverviewSection(overview: String) {
 }
 
 @Composable
-fun ProductionCompaniesSection(companies: List<ProductionCompany>) {
+fun ProductionCompaniesSection(companies: List<ProductionCompanyUiModel>) {
     if (companies.isNotEmpty()) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -413,7 +413,7 @@ fun ProductionCompaniesSection(companies: List<ProductionCompany>) {
 }
 
 @Composable
-fun ProductionCompanyItem(company: ProductionCompany) {
+fun ProductionCompanyItem(company: ProductionCompanyUiModel) {
     Card(
         modifier = Modifier.width(120.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -446,7 +446,7 @@ fun ProductionCompanyItem(company: ProductionCompany) {
 }
 
 @Composable
-fun AdditionalInfoSection(movieDetail: MovieDetail) {
+fun AdditionalInfoSection(movieDetail: MovieDetailUiModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -510,16 +510,16 @@ fun InfoRow(label: String, value: String) {
 }
 
 // Sample data function for testing
-fun getSampleMovieDetail(): MovieDetail {
-    return MovieDetail(
+fun getSampleMovieDetail(): MovieDetailUiModel {
+    return MovieDetailUiModel(
         adult = false,
         backdropPath = "/y1LSnnLu4fPMHDEv0FbybDKtxWD.jpg",
-        belongsToCollection = null,
+        belongsToCollectionUiModel = null,
         budget = 25000000,
-        genres = listOf(
-            Genre(37, "Western"),
-            Genre(35, "Comedy"),
-            Genre(80, "Crime")
+        genreUiModels = listOf(
+            GenreUiModel(37, "Western"),
+            GenreUiModel(35, "Comedy"),
+            GenreUiModel(80, "Crime")
         ),
         homepage = "https://a24films.com/films/eddington",
         id = 648878,
@@ -531,19 +531,19 @@ fun getSampleMovieDetail(): MovieDetail {
         popularity = 7.8876,
         posterPath = "/4GIqZUgPZ146BhibsPHMHef2nXX.jpg",
         productionCompanies = listOf(
-            ProductionCompany(41077, "/1ZXsGaFPgrgS6ZZGS37AqD5uU12.png", "A24", "US"),
-            ProductionCompany(123620, "/ePRhZ3yb09Ya6WMzCCBYopwIYbE.png", "Square Peg", "US"),
-            ProductionCompany(178359, null, "828 Productions", "US")
+            ProductionCompanyUiModel(41077, "/1ZXsGaFPgrgS6ZZGS37AqD5uU12.png", "A24", "US"),
+            ProductionCompanyUiModel(123620, "/ePRhZ3yb09Ya6WMzCCBYopwIYbE.png", "Square Peg", "US"),
+            ProductionCompanyUiModel(178359, null, "828 Productions", "US")
         ),
         productionCountries = listOf(
-            ProductionCountry("US", "United States of America"),
-            ProductionCountry("FI", "Finland")
+            ProductionCountryUiModel("US", "United States of America"),
+            ProductionCountryUiModel("FI", "Finland")
         ),
         releaseDate = "2025-07-16",
         revenue = 11299038,
         runtime = 149,
-        spokenLanguages = listOf(
-            SpokenLanguage("English", "en", "English")
+        spokenLanguageUiModels = listOf(
+            SpokenLanguageUiModel("English", "en", "English")
         ),
         status = "Released",
         tagline = "Hindsight is 2020.",

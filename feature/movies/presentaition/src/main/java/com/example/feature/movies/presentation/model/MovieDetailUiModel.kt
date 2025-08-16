@@ -1,12 +1,14 @@
 package com.example.feature.movies.presentation.model
 
+import com.example.feature.movies.presentation.core.UiModel
+
 // Enhanced data models for Movie Detail API response
-data class MovieDetail(
+data class MovieDetailUiModel(
     val adult: Boolean,
     val backdropPath: String?,
-    val belongsToCollection: Collection?,
+    val belongsToCollectionUiModel: CollectionUiModel?,
     val budget: Long,
-    val genres: List<Genre>,
+    val genreUiModels: List<GenreUiModel>,
     val homepage: String?,
     val id: Int,
     val imdbId: String?,
@@ -16,19 +18,19 @@ data class MovieDetail(
     val overview: String,
     val popularity: Double,
     val posterPath: String?,
-    val productionCompanies: List<ProductionCompany>,
-    val productionCountries: List<ProductionCountry>,
+    val productionCompanies: List<ProductionCompanyUiModel>,
+    val productionCountries: List<ProductionCountryUiModel>,
     val releaseDate: String,
     val revenue: Long,
     val runtime: Int,
-    val spokenLanguages: List<SpokenLanguage>,
+    val spokenLanguageUiModels: List<SpokenLanguageUiModel>,
     val status: String,
     val tagline: String?,
     val title: String,
     val video: Boolean,
     val voteAverage: Double,
     val voteCount: Int
-) {
+) : UiModel {
     // Helper function to get full poster URL
     fun getPosterUrl(size: String = "w500"): String? {
         return posterPath?.let { "https://image.tmdb.org/t/p/$size$it" }
@@ -84,7 +86,7 @@ data class MovieDetail(
 
     // Helper function to get genres as string
     fun getGenresString(): String {
-        return genres.joinToString(", ") { it.name }
+        return genreUiModels.joinToString(", ") { it.name }
     }
 
     // Helper function to get production companies as string
@@ -99,16 +101,16 @@ data class MovieDetail(
 
     // Helper function to get spoken languages as string
     fun getSpokenLanguagesString(): String {
-        return spokenLanguages.joinToString(", ") { it.englishName }
+        return spokenLanguageUiModels.joinToString(", ") { it.englishName }
     }
 }
 
-data class Genre(
+data class GenreUiModel(
     val id: Int,
     val name: String
 )
 
-data class ProductionCompany(
+data class ProductionCompanyUiModel(
     val id: Int,
     val logoPath: String?,
     val name: String,
@@ -119,20 +121,20 @@ data class ProductionCompany(
     }
 }
 
-data class ProductionCountry(
+data class ProductionCountryUiModel(
     val iso31661: String,
     val name: String
 )
 
-data class SpokenLanguage(
+data class SpokenLanguageUiModel(
     val englishName: String,
     val iso6391: String,
     val name: String
-)
+):UiModel
 
-data class Collection(
-    val id: Int,
+data class CollectionUiModel(
+    val id: Int? = null,
     val name: String,
     val posterPath: String?,
     val backdropPath: String?
-)
+): UiModel

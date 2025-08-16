@@ -26,16 +26,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.feature.movies.presentation.mapper.MovieUiMapper
 import com.example.feature.movies.presentation.model.MovieUi
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MovieRouter(
     modifier: Modifier = Modifier,
     onMovieClick: (MovieUi) -> Unit,
-    viewModel: MovieListViewModel = hiltViewModel()
+    viewModel: MovieListViewModel = koinViewModel()
 ) {
-
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    Scaffold(modifier = modifier, topBar = {
+    LaunchedEffect(uiState.errorMessage) {
+        if (uiState.errorMessage?.isNotEmpty() == true) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = uiState.errorMessage.orEmpty(),
+                    actionLabel = "Undo",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            viewModel.clearError()
+        }
+    }
+    Scaffold(modifier = modifier, snackbarHost = {
+        SnackbarHost(snackbarHostState)
+    }, topBar = {
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()

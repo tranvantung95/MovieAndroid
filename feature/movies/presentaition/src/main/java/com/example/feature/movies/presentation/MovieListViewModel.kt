@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.feature.movies.presentation.mapper.MovieUiMapper
 import com.example.share.feature.movie.domain.GetMoviesUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,14 +19,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
-@HiltViewModel
-class MovieListViewModel @Inject constructor(
+class MovieListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getMoviesUseCase: GetMoviesUseCase
+    private val getMoviesUseCase: GetMoviesUseCase,
+    private val movieUiMapper: MovieUiMapper
 ) : ViewModel() {
-    val mapper = MovieUiMapper()
     private var movieQuery by mutableStateOf("")
     private val queryFlow = snapshotFlow { movieQuery }
         .distinctUntilChanged()
@@ -41,7 +38,9 @@ class MovieListViewModel @Inject constructor(
                         onSuccess = { movies ->
                             ApiState.Success(movies)
                         },
-                        onFailure = { error -> ApiState.Error(error.message ?: "Unknown error") }
+                        onFailure = {
+                            error -> ApiState.Error(error.message ?: "Unknown error")
+                        }
                     )
                 }
                 .onStart {
@@ -67,7 +66,7 @@ class MovieListViewModel @Inject constructor(
             is ApiState.Success -> MovieListUiState(
                 searchQuery = query,
                 isLoading = false,
-                movieUis = mapper.mapToUIList(apiResult.data),
+                movieUis = movieUiMapper.mapToUIList(apiResult.data),
                 errorMessage = null
             )
 
@@ -86,6 +85,12 @@ class MovieListViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         movieQuery = query
+    }
+    fun clearError() {
+
+        uiState.value.errorMessage?.let {
+             uiState.value.copy(errorMessage = null)
+        }
     }
 }
 

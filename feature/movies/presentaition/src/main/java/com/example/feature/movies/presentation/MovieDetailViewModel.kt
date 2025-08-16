@@ -4,34 +4,39 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.example.feature.movies.presentation.fakedomain.GetMovieDetailUseCase
+import com.example.feature.movies.presentation.mapper.MovieDetailMapper
 import com.example.feature.movies.presentation.navigation.MovieDetailDestination
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.share.feature.movie.domain.GetMovieDetailUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
-@HiltViewModel
-class MovieDetailViewModel @Inject constructor(
+class MovieDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getMovieDetailUseCase: GetMovieDetailUseCase
+    private val getMovieDetailUseCase: GetMovieDetailUseCase,
+    private val movieDetailMapper: MovieDetailMapper
 ) : ViewModel() {
     private val destination = savedStateHandle.toRoute<MovieDetailDestination>()
     private val _uiState = MutableStateFlow(MovieDetailUiState())
-    private val getDetailFlow = flow {
-        emit(ApiState.Loading)
-        getMovieDetailUseCase.invoke(destination.id).onSuccess {
-            emit(ApiState.Success(it))
-        }.onFailure {
+    private val getDetailFlow =
+        getMovieDetailUseCase.invoke(destination.id).map { response ->
+            response.fold(onSuccess = {
+                ApiState.Success(it)
+            }, onFailure = {
+                ApiState.Error(it.message.orEmpty())
+            })
+        }.onStart {
+            emit(ApiState.Loading)
+        }.catch {
             emit(ApiState.Error(it.message.orEmpty()))
         }
-    }.catch { emit(ApiState.Error(it.message.orEmpty())) }
+
     val uiState: StateFlow<MovieDetailUiState> =
         combine(getDetailFlow, _uiState) { movies, currentState ->
             when (movies) {
@@ -44,7 +49,12 @@ class MovieDetailViewModel @Inject constructor(
                 }
 
                 is ApiState.Success -> {
-                    currentState.copy(isLoading = false, movieDetail = movies.data)
+                    currentState.copy(
+                        isLoading = false,
+                        movieDetail = movies.data?.let {
+                            movieDetailMapper.mapToUi(it)
+                        } ?: kotlin.run { null }
+                    )
                 }
             }
         }.stateIn(
@@ -52,7 +62,8 @@ class MovieDetailViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = MovieDetailUiState()
         )
-    fun clearError(){
+
+    fun clearError() {
         _uiState.update {
             it.copy(errorMessage = null)
         }
