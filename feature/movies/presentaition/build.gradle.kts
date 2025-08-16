@@ -14,7 +14,9 @@ android {
 
     defaultConfig {
         minSdk = 24
-
+        testInstrumentationRunnerArguments += mapOf(
+            "clearPackageData" to "true"
+        )
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -60,6 +62,11 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation("io.insert-koin:koin-androidx-compose:4.0.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.9.0")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.9.0")
+    androidTestImplementation("io.coil-kt:coil-test:2.5.0")
+
+
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.dagger.hilt.compiler)
@@ -74,5 +81,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(kotlin("test"))
 
 }

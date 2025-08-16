@@ -1,6 +1,6 @@
 [versions]
 agp = "8.10.1"
-coilComposeVersion = "2.5.0"
+coilComposeVersion = "2.7.0"
 hiltAndroid = "2.56"
 androidx-hilt-navigation = "1.2.0"
 hiltNavigationCompose = "1.1.0"

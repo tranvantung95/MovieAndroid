@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -151,7 +152,8 @@ fun MovieCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .testTag("movie_card_${movieUi.id}"),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -163,27 +165,28 @@ fun MovieCard(
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            // Movie Poster
             AsyncImage(
                 model = movieUi.getPosterUrl() ?: movieUi.getBackdropUrl(),
                 contentDescription = "${movieUi.title} poster",
                 modifier = Modifier
                     .width(80.dp)
                     .height(120.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .testTag("movie_poster_${movieUi.id}"),
                 contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Movie Details
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .testTag("movie_details_${movieUi.id}")
             ) {
                 // Title
                 Text(
+                    modifier = Modifier.testTag("movie_title_${movieUi.id}"),
                     text = movieUi.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -197,13 +200,19 @@ fun MovieCard(
                     text = movieUi.getReleaseYear(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .testTag("movie_year_${movieUi.id}")
+
                 )
 
                 // Rating
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .testTag("movie_rating_icon_${movieUi.id}")
+
                 ) {
                     Icon(
                         imageVector = Icons.Default.Star,
@@ -215,30 +224,34 @@ fun MovieCard(
                     Text(
                         text = "${movieUi.getFormattedRating()}/10",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("movie_rating_text_${movieUi.id}")
+
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "(${movieUi.voteCount})",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("movie_vote_count_${movieUi.id}")
                     )
                 }
 
-                // Overview
                 Text(
                     text = movieUi.overview,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp)
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .testTag("movie_overview_${movieUi.id}")
                 )
 
-                // Popularity Badge
                 Surface(
                     modifier = Modifier
-                        .padding(top = 6.dp),
+                        .padding(top = 6.dp)
+                        .testTag("movie_popularity_badge_${movieUi.id}"),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
@@ -246,7 +259,9 @@ fun MovieCard(
                         text = "Popularity: ${String.format("%.0f", movieUi.popularity)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .testTag("movie_popularity_text_${movieUi.id}")
                     )
                 }
             }
