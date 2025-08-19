@@ -114,8 +114,10 @@ fun MovieDetailRouter(
         }, title = {
             Text(
                 modifier = Modifier,
+                maxLines = 1,
                 text = state.movieDetail?.originalTitle.orEmpty(),
-                style = MaterialTheme.typography.headlineLarge,
+                style  = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
             )
         })
 

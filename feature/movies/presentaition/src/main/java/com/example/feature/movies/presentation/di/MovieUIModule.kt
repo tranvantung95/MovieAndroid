@@ -15,7 +15,7 @@ internal val mapperModule = module {
         MovieUiMapper()
     }
 }
-internal val viewModelMapper = module {
+internal val viewModelModule = module {
     viewModel {
         MovieListViewModel(get(), get(), get())
     }
@@ -24,5 +24,5 @@ internal val viewModelMapper = module {
     }
 }
 val movieUiModule = module {
-    includes(mapperModule, viewModelMapper)
+    includes(mapperModule, viewModelModule)
 }
